@@ -15,9 +15,11 @@ const props:OtpFormProps = {
   onlyNumberValues: true,
 }
 root.render(
-  <React.StrictMode>
+  // when strict mode is enabled shiftValues delete 1 extra number
+  // try enter 1 2 3 4 5 and remove 2, result will be 1 4 5
+  // <React.StrictMode>
     <div className="tempContainer">
       <OtpForm {...props} />
     </div>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

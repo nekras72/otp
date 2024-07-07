@@ -16,6 +16,19 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
     }
   }
 
+  const shiftValues = (obj: FormValues, index: number) => {
+    obj[`${index}`] = '';
+    const array = Object.values(obj).filter(el => el !== '');
+    for (let index = 0; index < inputsAmount; index++) {
+      if (index < array.length) {
+        obj[`${index}`] = array[`${index}`];
+      } else obj[`${index}`] = '';
+    }
+    console.log({ obj });
+    
+    return obj;
+  }
+
   const handleOnSubmitForm = (e?: React.FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
 
@@ -33,16 +46,16 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
       case 'ArrowUp':
       case 'ArrowDown':
       case ' ':
-      event.preventDefault();
+        event.preventDefault();
         break;
       case 'ArrowLeft':
-      event.preventDefault();
+        event.preventDefault();
         if (currentIndex > 0) {
           inputsRefs.current[`${currentIndex - 1}`]?.focus();
         }
         break;
       case 'ArrowRight':
-      event.preventDefault();
+        event.preventDefault();
         if (currentIndex < inputsAmount - 1) {
           inputsRefs.current[`${currentIndex + 1}`]?.focus();
         }
@@ -67,7 +80,12 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
       isValidValue = !isNaN(Number(value));
     }
     if ((onlyNumberValues && isValidValue) || !onlyNumberValues) {
-      setFormValues((state) => ({
+      // TODO: add replacement of an empty value
+      if (value === '' && index > 0 && index < inputsAmount - 1) {
+        setFormValues(state => {
+           return {...shiftValues(state, index)} 
+           });
+      } else setFormValues((state) => ({
         ...state,
         [`${index}`]: value
       }));
@@ -125,9 +143,12 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
   }, [inputsAmount]);
 
   useEffect(() => {
-    console.log({ isLastFilled, formValues });
     triggerSubmit(isLastFilled);
   }, [isLastFilled]);
+
+  useEffect(() => {
+    inputsRefs.current[0]?.focus();
+  }, []);
 
   return (
     <div className='otpContainer'>
