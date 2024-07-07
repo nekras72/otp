@@ -2,13 +2,21 @@ import React from 'react';
 import { OtpInputProps } from '../types';
 
 const OtpInput = 
-React.forwardRef<HTMLInputElement, OtpInputProps>(({ value, handleOnChange, inputClassName, inputSize, triggerSubmit }, ref) => 
+React.forwardRef<HTMLInputElement, OtpInputProps>(({
+    value,
+    handleKeyDown,
+    handleOnChange,
+    inputClassName,
+    inputSize,
+    triggerSubmit
+    }, ref) => 
 {
     const isSizeFromProps = inputSize?.width && inputSize?.height;
     return (
         <input
             value={value}
             ref={ref}
+            onKeyDown={handleKeyDown}
             onChange={(e) => {
                 handleOnChange(e);
                 if (triggerSubmit && e.target.value) triggerSubmit();

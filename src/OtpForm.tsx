@@ -25,6 +25,34 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
     } else setErrorMessage('Please checkout entered code');
   };
 
+  const handleKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    currentIndex: number,
+  ) => {
+    switch (event.key) {
+      case 'ArrowUp':
+      case 'ArrowDown':
+      case ' ':
+      event.preventDefault();
+        break;
+      case 'ArrowLeft':
+      event.preventDefault();
+        if (currentIndex > 0) {
+          inputsRefs.current[`${currentIndex - 1}`]?.focus();
+        }
+        break;
+      case 'ArrowRight':
+      event.preventDefault();
+        if (currentIndex < inputsAmount - 1) {
+          inputsRefs.current[`${currentIndex + 1}`]?.focus();
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
+
   const handleInputOnChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
     const inputValueLength = inputValue.length;
@@ -36,7 +64,7 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
 
     let isValidValue = false;
     if (onlyNumberValues) {
-      isValidValue = value !== ' ' && !isNaN(Number(value));
+      isValidValue = !isNaN(Number(value));
     }
     if ((onlyNumberValues && isValidValue) || !onlyNumberValues) {
       setFormValues((state) => ({
@@ -67,6 +95,7 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
         const isLast = index === inputsAmount - 1;
         inputsArray.push(
           <OtpInput
+            handleKeyDown={(e) => handleKeyDown(e, index)}
             triggerSubmit={isLast ? () => setIsLastFilled(true) : undefined}
             inputClassName={inputClassName}
             inputSize={inputSize}

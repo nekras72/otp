@@ -20,4 +20,5 @@ extends InputHTMLAttributes<HTMLInputElement> {
     inputClassName?: string;
     value: string;
     handleOnChange: (e:React.ChangeEvent<HTMLInputElement>) => void;
+    handleKeyDown: (e:React.KeyboardEvent<HTMLInputElement>) => void;
 }
