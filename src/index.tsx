@@ -9,17 +9,16 @@ const root = ReactDOM.createRoot(
 );
 
 // temporary props
-const props:OtpFormProps = {
+const props: OtpFormProps = {
   inputsAmount: 6,
   handleSubmit: (values: string) => console.log(`your code ${values} is looking good`),
   onlyNumberValues: true,
+  inputSize: { width: 64, height: 64 },
 }
 root.render(
   // when strict mode is enabled shiftValues delete 1 extra number
   // try enter 1 2 3 4 5 and remove 2, result will be 1 4 5
   // <React.StrictMode>
-    <div className="tempContainer">
-      <OtpForm {...props} />
-    </div>
+  <OtpForm {...props} />
   // </React.StrictMode>
 );

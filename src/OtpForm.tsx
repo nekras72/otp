@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import OtpInput from './components/OtpInput';
 
 import './OtpForm.css';
@@ -16,7 +16,7 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
     }
   }
 
-  const shiftValues = (obj: FormValues, index: number) => {
+  const shiftValues = (obj: FormValues, index: number, inputsAmount: number) => {
     obj[`${index}`] = '';
     const array = Object.values(obj).filter(el => el !== '');
     for (let index = 0; index < inputsAmount; index++) {
@@ -24,9 +24,17 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
         obj[`${index}`] = array[`${index}`];
       } else obj[`${index}`] = '';
     }
-    console.log({ obj });
-    
     return obj;
+  }
+
+  const shiftIfNeeded = (obj: FormValues, index: number, inputsAmount: number): FormValues => {
+    const isTheLast = index === inputsAmount - 1;
+    if (!isTheLast) {
+      const array = Object.values(obj).splice(index).filter(v => v !== '');
+      if (array.length > 0) {
+        return shiftValues(obj, index, inputsAmount);
+      };
+    } return obj;
   }
 
   const handleOnSubmitForm = (e?: React.FormEvent<HTMLFormElement>) => {
@@ -60,6 +68,21 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
           inputsRefs.current[`${currentIndex + 1}`]?.focus();
         }
         break;
+      case 'Delete':
+      case 'Backspace':
+        event.preventDefault();
+        if (formValues[`${currentIndex}`]) {
+          setFormValues((state) => (
+            shiftIfNeeded({
+              ...state,
+              [`${currentIndex}`]: ''
+            }, currentIndex, inputsAmount)));
+        }
+        if (currentIndex > 0) {
+          inputsRefs.current[`${currentIndex - 1}`]?.focus();
+        }
+        break;
+
 
       default:
         break;
@@ -68,6 +91,7 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
 
   const handleInputOnChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
+    
     const inputValueLength = inputValue.length;
     let value: string;
 
@@ -80,20 +104,13 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
       isValidValue = !isNaN(Number(value));
     }
     if ((onlyNumberValues && isValidValue) || !onlyNumberValues) {
-      // TODO: add replacement of an empty value
-      if (value === '' && index > 0 && index < inputsAmount - 1) {
-        setFormValues(state => {
-           return {...shiftValues(state, index)} 
-           });
-      } else setFormValues((state) => ({
+      setFormValues((state) => ({
         ...state,
         [`${index}`]: value
       }));
       if (value && index < inputsAmount - 1) {
         inputsRefs.current[`${index + 1}`]?.focus();
-      } else if (value === '' && index !== 0) {
-        inputsRefs.current[`${index - 1}`]?.focus();
-      } else if (index !== 0) event.target.blur();
+      } else if (value && index === inputsAmount - 1) event.target.blur();
     }
   };
 
@@ -101,7 +118,7 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
     const newFormState: FormValues = {};
     for (let index = 0; index < inputsAmount; index++) {
       newFormState[`${index}`] = '';
-    }; // end for loop
+    };
     setFormValues(newFormState);
   };
 
@@ -133,7 +150,6 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
 
     if (isLastFilled) {
       const formValuesStr = Object.values(formValues).reduce((str, char) => (str + char), '');
-      console.log({ formValuesStr });
       if (formValuesStr.length === inputsAmount) handleOnSubmitForm();
     };
   };

@@ -1,0 +1,40 @@
+.formInput {
+    box-sizing: border-box;
+    border: 5px solid gray;
+    border-radius: 25%;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    outline: none;
+    width: 64px;
+    height: 64px;
+    font-weight: 700;
+}
+
+.formInputFilled {
+    border-color: green;
+}
+
+.formInput:hover {
+    border-color: #3399ff;
+}
+
+.formInput:focus {
+    border-color: #3399ff;
+    box-shadow: #0073e5 0px 0px 0px 3px;
+}
+
+@media screen and (max-width:1024px) {
+    .formInput {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+@media screen and (max-width:768px) {
+    .formInput {
+        width: 32px;
+        height: 32px;
+    }
+}
