@@ -89,6 +89,8 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
     }
   };
 
+  // TODO add handling of insert a full code
+
   const handleInputOnChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
     
