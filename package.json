@@ -8,7 +8,11 @@
     "reactjs",
     "otp",
     "form",
-    "npm"
+    "one",
+    "time",
+    "password",
+    "typescript",
+    "react"
   ],
   "author": "Ilia Nekrasov",
   "license": "MIT",

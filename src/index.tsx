@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import OtpForm from './OtpForm';
@@ -16,9 +15,5 @@ const props: OtpFormProps = {
   inputSize: { width: 64, height: 64 },
 }
 root.render(
-  // when strict mode is enabled shiftValues delete 1 extra number
-  // try enter 1 2 3 4 5 and remove 2, result will be 1 4 5
-  // <React.StrictMode>
   <OtpForm {...props} />
-  // </React.StrictMode>
 );
