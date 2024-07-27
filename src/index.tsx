@@ -11,8 +11,7 @@ const root = ReactDOM.createRoot(
 const props: OtpFormProps = {
   inputsAmount: 6,
   handleSubmit: (values: string) => console.log(`your code ${values} is looking good`),
-  onlyNumberValues: true,
-  inputSize: { width: 64, height: 64 },
+  isLoading: false,
 }
 root.render(
   <OtpForm {...props} />

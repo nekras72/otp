@@ -1,13 +1,25 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import OtpInput from './components/OtpInput';
 
-import './OtpForm.css';
+import styles from './otpForm.module.css';
 import { FormValues, OtpFormProps } from './types';
+import { buildFormValues, checkPreviousValuesAndUpdate, shiftIfNeeded } from './utils';
 
-const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberValues = true, formClassName, inputClassName, handleSubmit }) => {
-  const [formValues, setFormValues] = useState<FormValues>({});
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [isLastFilled, setIsLastFilled] = useState<boolean>(false);
+const OtpForm: React.FC<OtpFormProps> = ({
+  inputsAmount,
+  formClassName,
+  inputClassName,
+  handleSubmit,
+  errorMessage,
+  isLoading,
+  separator,
+  loaderContainerClassName,
+  CustomLoader,
+  errorMessagePos = 'bottom',
+  errorContainerClassName
+}) => {
+  const otpContainerClass = errorMessagePos === 'bottom' ? styles.otpContainer : styles.otpContainerReverse;
+  const [formValues, setFormValues] = useState<FormValues>(buildFormValues(inputsAmount));
 
   const inputsRefs = useRef<(HTMLInputElement | null)[]>([]);
   const handleRef = (ref: HTMLInputElement | null) => {
@@ -15,36 +27,6 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
       inputsRefs.current.push(ref);
     }
   }
-
-  const shiftValues = (obj: FormValues, index: number, inputsAmount: number) => {
-    obj[`${index}`] = '';
-    const array = Object.values(obj).filter(el => el !== '');
-    for (let index = 0; index < inputsAmount; index++) {
-      if (index < array.length) {
-        obj[`${index}`] = array[`${index}`];
-      } else obj[`${index}`] = '';
-    }
-    return obj;
-  }
-
-  const shiftIfNeeded = (obj: FormValues, index: number, inputsAmount: number): FormValues => {
-    const isTheLast = index === inputsAmount - 1;
-    if (!isTheLast) {
-      const array = Object.values(obj).splice(index).filter(v => v !== '');
-      if (array.length > 0) {
-        return shiftValues(obj, index, inputsAmount);
-      };
-    } return obj;
-  }
-
-  const handleOnSubmitForm = (e?: React.FormEvent<HTMLFormElement>) => {
-    e?.preventDefault();
-
-    const formValuesStr = Object.values(formValues).reduce((str, char) => (str + char), '');
-    if (formValuesStr.length === inputsAmount) {
-      handleSubmit('formValuesStr');
-    } else setErrorMessage('Please checkout entered code');
-  };
 
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLInputElement>,
@@ -83,17 +65,21 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
         }
         break;
 
-
       default:
         break;
     }
   };
 
-  // TODO add handling of insert a full code
 
   const handleInputOnChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFocus = (i: number, value: string) => {
+
+      if (i < inputsAmount - 1) {
+        inputsRefs.current[`${i + 1}`]?.focus();
+      } else if (value !== '' && i === inputsAmount - 1) event.target.blur();
+    }
     const inputValue = event.target.value;
-    
+
     const inputValueLength = inputValue.length;
     let value: string;
 
@@ -101,78 +87,65 @@ const OtpForm: React.FC<OtpFormProps> = ({ inputsAmount, inputSize, onlyNumberVa
       value = inputValue;
     } else value = inputValue.slice(inputValueLength - 1);
 
-    let isValidValue = false;
-    if (onlyNumberValues) {
-      isValidValue = !isNaN(Number(value));
-    }
-    if ((onlyNumberValues && isValidValue) || !onlyNumberValues) {
-      setFormValues((state) => ({
-        ...state,
-        [`${index}`]: value
-      }));
-      if (value && index < inputsAmount - 1) {
-        inputsRefs.current[`${index + 1}`]?.focus();
-      } else if (value && index === inputsAmount - 1) event.target.blur();
-    }
+    checkPreviousValuesAndUpdate(index, value, formValues, setFormValues, handleFocus);
   };
 
-  const buildFormValues = (inputsAmount: number) => {
-    const newFormState: FormValues = {};
-    for (let index = 0; index < inputsAmount; index++) {
-      newFormState[`${index}`] = '';
-    };
-    setFormValues(newFormState);
-  };
+
+  const triggerSubmit = useCallback((e?: React.FormEvent<HTMLFormElement>) => {
+
+    e?.preventDefault();
+    const formValuesStr = Object.values(formValues).reduce((str, char) => (str + char), '');
+
+    if (formValuesStr.length === inputsAmount) handleSubmit(formValuesStr);
+  }, [formValues, handleSubmit, inputsAmount]);
 
   const getInputsToRender = (inputsAmount: number) => {
-    if (Object.values(formValues).length !== 0) {
-
-      const inputsArray = [];
+    if (inputsAmount !== 0) {
+      const inputsArray: JSX.Element | ReactNode[] = [];
       for (let index = 0; index < inputsAmount; index++) {
-        const isLast = index === inputsAmount - 1;
         inputsArray.push(
           <OtpInput
             handleKeyDown={(e) => handleKeyDown(e, index)}
-            triggerSubmit={isLast ? () => setIsLastFilled(true) : undefined}
             inputClassName={inputClassName}
-            inputSize={inputSize}
             key={`input-${index}`}
             value={formValues[`${index}`]}
             handleOnChange={(e) => handleInputOnChange(index, e)}
             ref={(ref: HTMLInputElement | null) => handleRef(ref)}
           />
         );
-
+        if (separator && index !== inputsAmount - 1) {
+          inputsArray.push(separator);
+        }
       }
       return inputsArray;
     }
   };
 
-  const triggerSubmit = (isLastFilled: boolean) => {
-
-    if (isLastFilled) {
-      const formValuesStr = Object.values(formValues).reduce((str, char) => (str + char), '');
-      if (formValuesStr.length === inputsAmount) handleOnSubmitForm();
-    };
-  };
-
   useEffect(() => {
-    buildFormValues(inputsAmount);
-  }, [inputsAmount]);
-
-  useEffect(() => {
-    triggerSubmit(isLastFilled);
-  }, [isLastFilled]);
+    triggerSubmit();
+  }, [triggerSubmit]);
 
   useEffect(() => {
     inputsRefs.current[0]?.focus();
   }, []);
 
   return (
-    <div className='otpContainer'>
-      <form onSubmit={handleOnSubmitForm} className={formClassName ?? 'formContainer'}>
-        {getInputsToRender(inputsAmount)}
-      </form>
+    <div className={otpContainerClass}>
+      {!isLoading ? (
+        <>
+          <form onSubmit={triggerSubmit} className={formClassName ?? styles.formContainer}>
+            {getInputsToRender(inputsAmount)}
+          </form>
+          <div className={errorContainerClassName ?? styles.errorContainer}>
+            {errorMessage && <p>{errorMessage}</p>}
+          </div>
+        </>
+      ) :
+        (
+          <div className={loaderContainerClassName ?? styles.loaderContainer}>
+            {CustomLoader ?? <div className={styles.loader}/>}
+          </div>
+        )}
     </div>
   );
 }

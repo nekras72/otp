@@ -1,6 +1,6 @@
 .formInput {
     box-sizing: border-box;
-    border: 5px solid gray;
+    border: 3px solid gray;
     border-radius: 25%;
     display: flex;
     align-items: center;
@@ -10,19 +10,27 @@
     width: 64px;
     height: 64px;
     font-weight: 700;
+    font-size: 50px;
 }
 
 .formInputFilled {
-    border-color: green;
-}
-
-.formInput:hover {
-    border-color: #3399ff;
+    box-sizing: border-box;
+    border: 7px solid green;
+    border-radius: 25%;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    outline: none;
+    width: 64px;
+    height: 64px;
+    font-weight: 700;
+    font-size: 48px;
 }
 
 .formInput:focus {
-    border-color: #3399ff;
-    box-shadow: #0073e5 0px 0px 0px 3px;
+    /* border-color: #3399ff; */
+    box-shadow: gray 0px 0px 0px 3px;
 }
 
 @media screen and (max-width:1024px) {

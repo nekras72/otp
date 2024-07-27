@@ -1,12 +1,17 @@
-import { InputHTMLAttributes } from "react";
+import { InputHTMLAttributes, ReactNode } from "react";
 
 export type OtpFormProps = {
     inputsAmount: number;
-    inputSize?: {width: number, height: number};
     formClassName?: string;
     inputClassName?: string;
+    loaderContainerClassName?: string;
+    errorContainerClassName?: string;
     handleSubmit: (values: string) => void;
-    onlyNumberValues?: boolean;
+    errorMessage?: string;
+    errorMessagePos?: 'top' | 'bottom';
+    isLoading: boolean;
+    separator?: JSX.Element;
+    CustomLoader?: JSX.Element;
 }
 
 export type FormValues = {
@@ -15,8 +20,6 @@ export type FormValues = {
 
 export interface OtpInputProps
 extends InputHTMLAttributes<HTMLInputElement> {
-    triggerSubmit?: () => void;
-    inputSize?: {width: number, height: number};
     inputClassName?: string;
     inputFilledClassName?: string;
     value: string;
